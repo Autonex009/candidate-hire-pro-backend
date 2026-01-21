@@ -21,6 +21,23 @@ class Settings(BaseSettings):
     # AWS (optional)
     aws_region: str = "ap-south-1"
     s3_bucket: str = ""
+    
+    # Email Configuration
+    mail_username: str = ""
+    mail_password: str = ""
+    mail_from: str = "noreply@autonex.ai"
+    mail_from_name: str = "Autonex AI"
+    mail_port: int = 587
+    mail_server: str = "smtp.gmail.com"
+    mail_starttls: bool = True
+    mail_ssl_tls: bool = False
+    
+    # Frontend URL for email links
+    frontend_url: str = "http://localhost:5173"
+    
+    # OTP Settings
+    otp_expire_minutes: int = 10
+    reset_token_expire_minutes: int = 60
 
     class Config:
         env_file = ".env"

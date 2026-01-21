@@ -28,6 +28,15 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # Email verification
+    is_verified = Column(Boolean, default=False)
+    verification_otp = Column(String(6), nullable=True)
+    otp_expires_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Password reset
+    reset_token = Column(String(64), nullable=True)
+    reset_token_expires_at = Column(DateTime(timezone=True), nullable=True)
+
     # Stats
     neo_pat_score = Column(Integer, default=0)
     solved_easy = Column(Integer, default=0)

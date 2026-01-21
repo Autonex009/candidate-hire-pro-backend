@@ -28,6 +28,7 @@ class UserProfile(UserBase):
     phone: Optional[str] = None
     avatar_url: Optional[str] = None
     role: UserRole
+    is_verified: bool = False
     neo_pat_score: int
     solved_easy: int
     solved_medium: int

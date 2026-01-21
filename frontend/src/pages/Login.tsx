@@ -130,7 +130,7 @@ export default function Login({ onLogin }: LoginProps) {
                             <div className="form-group">
                                 <div className="form-label-row">
                                     <label className="form-label">Password</label>
-                                    <a href="#" className="forgot-link">Forgot password?</a>
+                                    <Link to="/forgot-password" className="forgot-link">Forgot password?</Link>
                                 </div>
                                 <div className="input-wrapper">
                                     <svg className="input-icon" viewBox="0 0 24 24" fill="currentColor">

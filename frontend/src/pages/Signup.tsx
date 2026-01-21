@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../services/api';
+import PasswordStrength, { validatePassword } from '../components/PasswordStrength';
 import logoImg from '../assets/autonex_ai_cover.png';
 import './Signup.css';
 
 export default function Signup() {
     const [formData, setFormData] = useState({
         email: '',
+        confirmEmail: '',
         phone: '',
         password: '',
         confirmPassword: ''
@@ -20,20 +22,29 @@ export default function Signup() {
             ...prev,
             [e.target.name]: e.target.value
         }));
+        setError(''); // Clear error on change
     };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
 
-        // Validation
+        // Email confirmation check
+        if (formData.email !== formData.confirmEmail) {
+            setError('Email addresses do not match');
+            return;
+        }
+
+        // Password confirmation check
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return;
         }
 
-        if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters');
+        // Password strength validation
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            setError('Password does not meet requirements: ' + passwordValidation.errors[0]);
             return;
         }
 
@@ -50,14 +61,19 @@ export default function Signup() {
                 phone: formData.phone,
                 password: formData.password
             });
-            // After registration, redirect to login or auto-login
-            navigate('/complete-profile');
+            // Redirect to OTP verification page
+            navigate('/verify-email', { state: { email: formData.email } });
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }
     };
+
+    // Check if emails match
+    const emailsMatch = formData.confirmEmail === '' || formData.email === formData.confirmEmail;
+    // Check if passwords match
+    const passwordsMatch = formData.confirmPassword === '' || formData.password === formData.confirmPassword;
 
     return (
         <div className="signup-page">
@@ -98,6 +114,29 @@ export default function Signup() {
                     </div>
 
                     <div className="form-group">
+                        <label className="form-label">Confirm Email Address</label>
+                        <div className={`input-wrapper ${!emailsMatch ? 'input-error' : ''}`}>
+                            <svg className="input-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                            </svg>
+                            <input
+                                type="email"
+                                name="confirmEmail"
+                                className="form-input"
+                                placeholder="Confirm your email"
+                                value={formData.confirmEmail}
+                                onChange={handleChange}
+                                required
+                            />
+                            {formData.confirmEmail && (
+                                <span className={`match-indicator ${emailsMatch ? 'match' : 'no-match'}`}>
+                                    {emailsMatch ? '✓' : '✗'}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="form-group">
                         <label className="form-label">Phone Number</label>
                         <div className="input-wrapper">
                             <svg className="input-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -116,42 +155,45 @@ export default function Signup() {
                         </div>
                     </div>
 
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label className="form-label">Password</label>
-                            <div className="input-wrapper">
-                                <svg className="input-icon" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
-                                </svg>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    className="form-input"
-                                    placeholder="Min. 8 characters"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    minLength={8}
-                                />
-                            </div>
+                    <div className="form-group">
+                        <label className="form-label">Password</label>
+                        <div className="input-wrapper">
+                            <svg className="input-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                            </svg>
+                            <input
+                                type="password"
+                                name="password"
+                                className="form-input"
+                                placeholder="Create a strong password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
+                        <PasswordStrength password={formData.password} />
+                    </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Confirm Password</label>
-                            <div className="input-wrapper">
-                                <svg className="input-icon" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
-                                </svg>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    className="form-input"
-                                    placeholder="Confirm password"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
+                    <div className="form-group">
+                        <label className="form-label">Confirm Password</label>
+                        <div className={`input-wrapper ${!passwordsMatch ? 'input-error' : ''}`}>
+                            <svg className="input-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                            </svg>
+                            <input
+                                type="password"
+                                name="confirmPassword"
+                                className="form-input"
+                                placeholder="Confirm password"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                            />
+                            {formData.confirmPassword && (
+                                <span className={`match-indicator ${passwordsMatch ? 'match' : 'no-match'}`}>
+                                    {passwordsMatch ? '✓' : '✗'}
+                                </span>
+                            )}
                         </div>
                     </div>
 

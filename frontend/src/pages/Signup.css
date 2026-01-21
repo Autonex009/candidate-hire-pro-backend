@@ -208,3 +208,42 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Email/Password Match Indicators */
+.input-wrapper {
+    position: relative;
+}
+
+.match-indicator {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.match-indicator.match {
+    color: #28a745;
+}
+
+.match-indicator.no-match {
+    color: #dc3545;
+}
+
+.input-wrapper.input-error .form-input {
+    border-color: #dc3545;
+}
+
+.forgot-password-link {
+    display: block;
+    text-align: right;
+    font-size: 0.875rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    margin-top: -8px;
+}
+
+.forgot-password-link:hover {
+    text-decoration: underline;
+}

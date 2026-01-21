@@ -7,6 +7,9 @@ import type { User } from './types';
 import Layout from './components/Layout/Layout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ProfileWizard from './pages/ProfileWizard';
 import Dashboard from './pages/Dashboard';
 import Jobs from './pages/Jobs';
@@ -117,6 +120,18 @@ function App() {
         <Route
           path="/signup"
           element={isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />}
+        />
+        <Route
+          path="/verify-email"
+          element={isAuthenticated ? <Navigate to="/dashboard" /> : <VerifyEmail />}
+        />
+        <Route
+          path="/forgot-password"
+          element={isAuthenticated ? <Navigate to="/dashboard" /> : <ForgotPassword />}
+        />
+        <Route
+          path="/reset-password"
+          element={isAuthenticated ? <Navigate to="/dashboard" /> : <ResetPassword />}
         />
         <Route
           path="/complete-profile"
