@@ -4,15 +4,22 @@ from .config import get_settings
 
 settings = get_settings()
 
-# Supabase uses PgBouncer in transaction mode, which doesn't support prepared statements
-# We need to disable statement caching for compatibility
-engine = create_async_engine(
-    settings.database_url, 
-    echo=settings.debug,
-    connect_args={
+# Configure connection arguments based on database type
+# Supabase/PostgreSQL with PgBouncer needs statement_cache_size=0
+# SQLite doesn't support these parameters
+connect_args = {}
+if "postgresql" in settings.database_url:
+    connect_args = {
         "statement_cache_size": 0,
         "prepared_statement_cache_size": 0,
     }
+
+engine = create_async_engine(
+    settings.database_url, 
+    echo=settings.debug,
+    connect_args=connect_args,
+    pool_pre_ping=True,  # Verify connections before use
+    pool_recycle=300,    # Recycle connections every 5 minutes
 )
 async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 

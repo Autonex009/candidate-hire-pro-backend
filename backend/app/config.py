@@ -5,7 +5,7 @@ import os
 
 class Settings(BaseSettings):
     app_name: str = "CDC Assessment Portal API"
-    debug: bool = False
+    debug: bool = os.getenv("DEBUG", "false").lower() == "true"
     
     # Database - supports both SQLite (local) and PostgreSQL (production)
     database_url: str = "sqlite+aiosqlite:///./cdc_portal.db"
@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         extra = "ignore"
+        # Make field names case-insensitive for environment variables
+        case_sensitive = False
     
     def get_cors_origins(self) -> list:
         """Parse CORS origins from comma-separated string"""
