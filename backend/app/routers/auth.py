@@ -7,7 +7,7 @@ from pydantic import BaseModel, EmailStr
 
 from ..database import get_db
 from ..models.user import User
-from ..schemas.user import UserCreate, UserLogin, UserProfile, Token
+from ..schemas.user import UserCreate, UserProfile, Token
 from ..services.auth import (
     authenticate_user,
     create_access_token,
@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 settings = get_settings()
 
 
-# New schemas for email verification
+# Schemas for email verification
 class SendOTPRequest(BaseModel):
     email: EmailStr
 
@@ -145,7 +145,6 @@ async def send_otp(request: SendOTPRequest, db: AsyncSession = Depends(get_db)):
     user = result.scalar_one_or_none()
     
     if not user:
-        # Don't reveal if email exists
         return MessageResponse(message="If the email exists, an OTP has been sent.")
     
     if user.is_verified:
@@ -154,7 +153,6 @@ async def send_otp(request: SendOTPRequest, db: AsyncSession = Depends(get_db)):
             detail="Email already verified. Please login."
         )
     
-    # Generate new OTP
     otp = generate_otp()
     user.verification_otp = otp
     user.otp_expires_at = get_otp_expiry()
@@ -183,15 +181,13 @@ async def verify_otp(request: VerifyOTPRequest, db: AsyncSession = Depends(get_d
             detail="Email already verified. Please login."
         )
     
-    # Check OTP
     if user.verification_otp != request.otp:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid OTP"
         )
     
-    # Check expiry
-    if user.otp_expires_at < datetime.now(timezone.utc):
+    if user.otp_expires_at and user.otp_expires_at < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="OTP expired. Please request a new one."
@@ -206,7 +202,6 @@ async def verify_otp(request: VerifyOTPRequest, db: AsyncSession = Depends(get_d
     # Send welcome email
     await send_welcome_email(user.email, user.name)
     
-    # Generate token and login user
     access_token = create_access_token(
         data={"sub": str(user.id)},
         expires_delta=timedelta(minutes=settings.access_token_expire_minutes)
@@ -221,17 +216,14 @@ async def forgot_password(request: ForgotPasswordRequest, db: AsyncSession = Dep
     result = await db.execute(select(User).where(User.email == request.email))
     user = result.scalar_one_or_none()
     
-    # Always return success to prevent email enumeration
     if not user:
         return MessageResponse(message="If the email exists, a reset link has been sent.")
     
-    # Generate reset token
     reset_token = generate_reset_token()
     user.reset_token = reset_token
     user.reset_token_expires_at = get_reset_token_expiry()
     await db.commit()
     
-    # Send reset email
     await send_password_reset_email(user.email, user.name, reset_token)
     
     return MessageResponse(message="If the email exists, a reset link has been sent.")
@@ -249,14 +241,12 @@ async def reset_password(request: ResetPasswordRequest, db: AsyncSession = Depen
             detail="Invalid or expired reset token"
         )
     
-    # Check expiry
-    if user.reset_token_expires_at < datetime.now(timezone.utc):
+    if user.reset_token_expires_at and user.reset_token_expires_at < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Reset token expired. Please request a new one."
         )
     
-    # Update password
     user.hashed_password = get_password_hash(request.new_password)
     user.reset_token = None
     user.reset_token_expires_at = None

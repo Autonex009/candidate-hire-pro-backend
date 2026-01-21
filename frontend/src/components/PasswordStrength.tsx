@@ -54,7 +54,6 @@ export default function PasswordStrength({ password, showRequirements = true }: 
 
     return (
         <div className="password-strength">
-            {/* Strength Meter */}
             <div className="strength-meter">
                 <div className="strength-bar">
                     <div
@@ -70,7 +69,6 @@ export default function PasswordStrength({ password, showRequirements = true }: 
                 </span>
             </div>
 
-            {/* Requirements Checklist */}
             {showRequirements && (
                 <div className="password-requirements">
                     {results.map(rule => (

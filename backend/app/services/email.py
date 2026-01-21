@@ -4,7 +4,6 @@ Email service for sending OTP verification, welcome, and password reset emails
 import random
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 from pathlib import Path
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType

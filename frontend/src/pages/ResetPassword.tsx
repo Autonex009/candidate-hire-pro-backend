@@ -61,9 +61,7 @@ export default function ResetPassword() {
                     <div className="reset-icon error-icon">❌</div>
                     <h1>Invalid Link</h1>
                     <p>This password reset link is invalid or has expired.</p>
-                    <Link to="/forgot-password" className="reset-btn-link">
-                        Request New Link
-                    </Link>
+                    <Link to="/forgot-password" className="reset-btn-link">Request New Link</Link>
                 </div>
             </div>
         );

@@ -46,12 +46,6 @@
     gap: 20px;
 }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
 .form-group {
     display: flex;
     flex-direction: column;
@@ -162,10 +156,6 @@
     font-weight: 500;
 }
 
-.signup-terms a:hover {
-    text-decoration: underline;
-}
-
 .signup-error {
     display: flex;
     align-items: center;
@@ -195,25 +185,6 @@
     font-weight: 600;
 }
 
-.footer-link:hover {
-    text-decoration: underline;
-}
-
-@media (max-width: 520px) {
-    .signup-card {
-        padding: 28px 24px;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Email/Password Match Indicators */
-.input-wrapper {
-    position: relative;
-}
-
 .match-indicator {
     position: absolute;
     right: 14px;
@@ -235,15 +206,8 @@
     border-color: #dc3545;
 }
 
-.forgot-password-link {
-    display: block;
-    text-align: right;
-    font-size: 0.875rem;
-    color: var(--color-primary);
-    text-decoration: none;
-    margin-top: -8px;
-}
-
-.forgot-password-link:hover {
-    text-decoration: underline;
+@media (max-width: 520px) {
+    .signup-card {
+        padding: 28px 24px;
+    }
 }

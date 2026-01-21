@@ -16,14 +16,12 @@ export default function VerifyEmail() {
 
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    // Redirect if no email in state
     useEffect(() => {
         if (!email) {
             navigate('/signup');
         }
     }, [email, navigate]);
 
-    // Countdown timer for resend
     useEffect(() => {
         if (resendCooldown > 0) {
             const timer = setTimeout(() => setResendCooldown(prev => prev - 1), 1000);
@@ -32,14 +30,13 @@ export default function VerifyEmail() {
     }, [resendCooldown]);
 
     const handleChange = (index: number, value: string) => {
-        if (!/^\d*$/.test(value)) return; // Only allow digits
+        if (!/^\d*$/.test(value)) return;
 
         const newOtp = [...otp];
-        newOtp[index] = value.slice(-1); // Only keep last digit
+        newOtp[index] = value.slice(-1);
         setOtp(newOtp);
         setError('');
 
-        // Auto-focus next input
         if (value && index < 5) {
             inputRefs.current[index + 1]?.focus();
         }
@@ -83,7 +80,6 @@ export default function VerifyEmail() {
             const data = await response.json();
 
             if (response.ok) {
-                // Store token and redirect
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('token', data.access_token);
                 navigate('/complete-profile');
@@ -109,7 +105,7 @@ export default function VerifyEmail() {
 
             if (response.ok) {
                 setSuccess('New OTP sent to your email!');
-                setResendCooldown(60); // 60 second cooldown
+                setResendCooldown(60);
                 setTimeout(() => setSuccess(''), 3000);
             }
         } catch {

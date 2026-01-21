@@ -43,9 +43,7 @@ export default function ForgotPassword() {
                         If an account exists for <strong>{email}</strong>,
                         we've sent a password reset link.
                     </p>
-                    <p className="check-spam">
-                        Don't see it? Check your spam folder.
-                    </p>
+                    <p className="check-spam">Don't see it? Check your spam folder.</p>
                     <Link to="/" className="back-to-login">Back to Login</Link>
                 </div>
             </div>

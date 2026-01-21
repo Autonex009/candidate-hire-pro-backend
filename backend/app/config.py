@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60 * 24  # 24 hours
     
     # CORS - comma-separated list of allowed origins
-    cors_origins: str = "http://localhost:5173,http://localhost:5174"
+    cors_origins: str = "http://localhost:5173,http://localhost:5174,http://localhost:5173"
     
     # AWS (optional)
     aws_region: str = "ap-south-1"

@@ -83,11 +83,6 @@
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
-.otp-input:not(:placeholder-shown) {
-    border-color: #667eea;
-    background: #f8f9ff;
-}
-
 .verify-btn {
     width: 100%;
     padding: 16px;
@@ -141,21 +136,8 @@
     color: #6c757d;
     text-decoration: none;
     font-size: 14px;
-    transition: color 0.2s;
 }
 
 .back-link:hover {
     color: #667eea;
-}
-
-@media (max-width: 480px) {
-    .verify-card {
-        padding: 30px 20px;
-    }
-
-    .otp-input {
-        width: 42px;
-        height: 52px;
-        font-size: 20px;
-    }
 }
