@@ -245,12 +245,20 @@ export function useTestTimer(durationMinutes: number, onTimeUp?: () => void, sta
     const [timeRemaining, setTimeRemaining] = useState(durationMinutes * 60);
     const [isRunning, setIsRunning] = useState(false);
 
+    // Use ref to avoid restarting interval when callback changes
+    const onTimeUpRef = useRef(onTimeUp);
+    useEffect(() => {
+        onTimeUpRef.current = onTimeUp;
+    }, [onTimeUp]);
+
     // Calculate remaining time relative to server start time
     const calculateRemaining = useCallback(() => {
         if (!startTime) return durationMinutes * 60;
 
         const start = new Date(startTime).getTime();
         const now = new Date().getTime();
+        if (isNaN(start)) return durationMinutes * 60;
+
         const elapsedSeconds = Math.floor((now - start) / 1000);
         const totalSeconds = durationMinutes * 60;
 
@@ -259,8 +267,13 @@ export function useTestTimer(durationMinutes: number, onTimeUp?: () => void, sta
 
     // Initialize/Sync timer
     useEffect(() => {
-        setTimeRemaining(calculateRemaining());
-    }, [calculateRemaining]);
+        const remaining = calculateRemaining();
+        setTimeRemaining(remaining);
+        // Auto-start if we have a valid start time
+        if (startTime && remaining > 0 && remaining < durationMinutes * 60) {
+            setIsRunning(true);
+        }
+    }, [calculateRemaining, startTime, durationMinutes]);
 
     useEffect(() => {
         if (isRunning && timeRemaining > 0) {
@@ -271,13 +284,13 @@ export function useTestTimer(durationMinutes: number, onTimeUp?: () => void, sta
                     setTimeRemaining(remaining);
                     if (remaining <= 0) {
                         setIsRunning(false);
-                        onTimeUp?.();
+                        if (onTimeUpRef.current) onTimeUpRef.current();
                     }
                 } else {
                     setTimeRemaining(prev => {
                         if (prev <= 1) {
                             setIsRunning(false);
-                            onTimeUp?.();
+                            if (onTimeUpRef.current) onTimeUpRef.current();
                             return 0;
                         }
                         return prev - 1;
@@ -286,7 +299,7 @@ export function useTestTimer(durationMinutes: number, onTimeUp?: () => void, sta
             }, 1000);
             return () => clearInterval(interval);
         }
-    }, [isRunning, timeRemaining, onTimeUp, startTime, calculateRemaining]);
+    }, [isRunning, startTime, calculateRemaining]); // Removed onTimeUp for stability
 
     const start = useCallback(() => setIsRunning(true), []);
     const pause = useCallback(() => setIsRunning(false), []);
