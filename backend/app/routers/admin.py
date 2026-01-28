@@ -231,7 +231,6 @@ async def upload_file(
     """
     import httpx
     
-    contents = await file.read()
     filename = file.filename or f"upload_{uuid.uuid4().hex}"
     
     # All uploads go to Supabase Storage - use service_role key for write access
@@ -247,6 +246,14 @@ async def upload_file(
     file_path = f"{file_type}/{uuid.uuid4().hex}_{safe_filename}"
     
     try:
+        # Stream file to Supabase using a generator to avoid loading it into memory
+        async def file_generator():
+            while True:
+                chunk = await file.read(64 * 1024)  # 64KB chunks
+                if not chunk:
+                    break
+                yield chunk
+
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 f"{supabase_url}/storage/v1/object/{bucket}/{file_path}",
@@ -255,7 +262,7 @@ async def upload_file(
                     "apikey": supabase_key,
                     "Content-Type": file.content_type or "application/octet-stream"
                 },
-                content=contents
+                content=file_generator()
             )
             
             if response.status_code in [200, 201]:

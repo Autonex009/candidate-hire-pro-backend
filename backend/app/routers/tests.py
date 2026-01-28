@@ -424,7 +424,14 @@ async def upload_answer_file(
     file_path = f"answers/{safe_filename}"
     
     try:
-        content = await file.read()
+        # Stream file to Supabase using a generator to avoid loading it into memory
+        async def file_generator():
+            while True:
+                chunk = await file.read(64 * 1024)  # 64KB chunks
+                if not chunk:
+                    break
+                yield chunk
+
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 f"{supabase_url}/storage/v1/object/{bucket}/{file_path}",
@@ -433,7 +440,7 @@ async def upload_answer_file(
                     "apikey": supabase_key,
                     "Content-Type": file.content_type or "application/octet-stream"
                 },
-                content=content
+                content=file_generator()
             )
             
             if response.status_code in [200, 201]:
